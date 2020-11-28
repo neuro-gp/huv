@@ -21,6 +21,20 @@ services:
     depends_on:
       - db
 
+  rest:
+    image: django:v1
+    privileged: true
+    env_file:
+      - ./api.env
+    volumes:
+      - ./rest:/rest
+    command: python manage.py runserver 0.0.0.0:8080
+    user: 1000:1000
+    ports:
+      - 8033:8080
+    depends_on:
+      - db
+
 volumes:
   huv_data:
     external: true
