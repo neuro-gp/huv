@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    privileged: true
+    env_file:
+      - ./api.env
+    volumes:
+      - huv_data:/var/lib/mysql
+    ports:
+      - 8031:3306
+
+  adminer:
+    image: adminer
+    privileged: true
+    ports:
+      - 8032:8080
+    depends_on:
+      - db
+
+volumes:
+  huv_data:
+    external: true
+
