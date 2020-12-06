@@ -4,6 +4,9 @@ class Familia(models.Model):
     nombre_popular = models.CharField(max_length=200, null=True)
     nombre_cientifico = models.CharField(max_length=200, null=False)
 
+    def __str__(self,):
+        return self.nombre_popular if self.nombre_popular else self.nombre_cientifico
+
 class Rotaciones(models.Model):
     anterior = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='anterior')
     posterior = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='posterior')
@@ -44,6 +47,9 @@ class Planta(models.Model):
     nombre_cientifico = models.CharField(max_length=200, null=False)
 
     familia = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='plantas')
+
+    def __str__(self,):
+        return self.nombre_popular if self.nombre_popular else self.nombre_cientifico
 
 class Ficha(models.Model):
     planta = models.ForeignKey(Planta, on_delete=models.SET_NULL, null=True, related_name='fichas')
