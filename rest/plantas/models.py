@@ -1,48 +1,79 @@
 from django.db import models
 
+
+MESES = [('ENE', 'Enero'), ('FEB', 'Febrero'), ('MAR', 'Marzo'),
+         ('ABR', 'Abril'), ('MAY', 'Mayo'), ('JUN', 'Junio'),
+         ('JUL', 'Julio'), ('AGO', 'Agosto'), ('SEP', 'Septiembre'),
+         ('OCT', 'Octubre'), ('NOV', 'Noviembre'), ('DIC', 'Diciembre')]
+
+
 class Familia(models.Model):
     nombre_popular = models.CharField(max_length=200, null=True)
     nombre_cientifico = models.CharField(max_length=200, null=False)
 
+
     def __str__(self,):
         return self.nombre_popular if self.nombre_popular else self.nombre_cientifico
 
+
+class Planta(models.Model):
+    nombre_cientifico = models.CharField(max_length=200, null=True)
+    nombre_popular = models.CharField(max_length=200, null=True)
+    variedad = models.CharField(max_length=200, null=True)
+    familia = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True,
+                                related_name='plantas')
+
+
+    def __str__(self,):
+        return self.nombre_popular if self.nombre_popular else self.nombre_cientifico
+
+
 class Rotaciones(models.Model):
-    anterior = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='anterior')
-    actual =  models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='actual')
-    posterior = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='posterior')
+    anterior = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True,
+                                 related_name='anterior')
+    actual =  models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True,
+                                related_name='actual')
+    posterior = models.ForeignKey(Familia, on_delete=models.SET_NULL,
+                                  null=True, related_name='posterior')
+
 
     def __str__(self,):
         return self.actual.nombre_popular if self.actual.nombre_popular else self.actual.nombre_cientifico
 
+
 class Epoca(models.Model):
-    tipo = models.CharField(max_length=200, null=True, choices=[
-        ('SE','Semillero'),
-        ('SI','Siembra'),
-        ('TR','Trasplante'),
-        ('CO','Cosecha'),
-    ])
-    estacion = models.CharField(max_length=200, null=True)
-    desde = models.DateField(null=True) # tiene que ser sin año
-    hasta = models.DateField(null=True)
+    tipo = models.CharField(max_length=200, null=False, default='SI',
+    choices=[('SE', 'Semillero'), ('SI', 'Siembra'),
+             ('TR', 'Trasplante'), ('CO', 'Cosecha')])
+    desde = models.CharField(max_length=200, null=False, default='ENE',
+                             choices=MESES)
+    hasta = models.CharField(max_length=200, null=False, default='DIC',
+                             choices=MESES)
+
+
     def __str__(self,):
-        return self.estacion if self.estacion else 'None'
+        return '{} de {} a {}'.format(self.tipo, self.desde, self.hasta)
+
 
 class Fuente(models.Model):
     autor = models.CharField(max_length=200, null=True)
     cita = models.TextField(null=False)
     url = models.TextField(null=True) # posibilidad de no agregar
 
+
     def __str__(self,):
         return self.autor if self.autor else 'None'
+
 
 class Tip(models.Model):
     descripcion = models.CharField(max_length=200, null=True)
     contenido = models.TextField(null=False)
     fuente = models.ForeignKey(Fuente, on_delete=models.SET_NULL, null=True, related_name='citada_en_tips')
 
+
     def __str__(self,):
         return self.descripcion if self.descripcion else 'None'
+
 
 class Sustrato(models.Model):
     tierra = models.CharField(max_length=200, null=True)
@@ -50,8 +81,10 @@ class Sustrato(models.Model):
     nitrogeno = models.BooleanField(default=False)
     fosforo = models.BooleanField(default=False)
 
+
     def __str__(self,):
         return self.tierra
+
 
 class Tipo(models.Model):
     nombre = models.CharField(max_length=200, null=False, choices=[
@@ -61,17 +94,9 @@ class Tipo(models.Model):
         ('RA','Raiz'),
     ])
 
+
     def __str__(self,):
         return self.nombre
-
-class Planta(models.Model):
-    nombre_cientifico = models.CharField(max_length=200, null=False)
-    nombre_popular = models.CharField(max_length=200, null=True)
-    especie = models.CharField(max_length=200, null=True) # puede ser variedad
-    familia = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, related_name='plantas')
-
-    def __str__(self,):
-        return self.nombre_popular if self.nombre_popular else self.nombre_cientifico
 
 class Ficha(models.Model):
     planta = models.ForeignKey(Planta, on_delete=models.SET_NULL, null=True, related_name='fichas')
@@ -108,8 +133,10 @@ class Ficha(models.Model):
     tips = models.ManyToManyField(Tip)
     fuentes = models.ManyToManyField(Fuente)
 
+
     def __str__(self,):
         return self.planta.nombre_popular if self.planta.nombre_popular else self.planta.nombre_cientifico
+
 
 class Interacciones(models.Model):
     target = models.ForeignKey(Planta, on_delete=models.SET_NULL, null=True,
@@ -120,6 +147,7 @@ class Interacciones(models.Model):
     ])
 
     actores = models.ManyToManyField(Planta)
+
 
     def __str__(self,):
         return self.target.nombre_popular if self.target.nombre_popular else self.target.nombre_cientifico 
